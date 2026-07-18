@@ -14,7 +14,7 @@ const supabase = createSupabaseClient(process.env.SUPABASE_URL, process.env.SUPA
 router.post('/', async (req, res) => {
     try {
         const { message, history, selectedDocs } = req.body;
-        
+
         if (!message) {
             return res.status(400).json({ error: 'Message is required' });
         }
@@ -53,7 +53,7 @@ router.post('/', async (req, res) => {
                 console.error('Error fetching documents:', error);
                 throw error;
             }
-            
+
             documents = supaDocs || [];
 
             // Apply local filtering if specific documents are selected
@@ -66,7 +66,7 @@ router.post('/', async (req, res) => {
 
             // Construct context
             context = documents.map(doc => doc.content).join('\n\n');
-            
+
             // Extract sources and confidence
             sources = [...new Set(documents.map(d => d.metadata?.filename).filter(Boolean))];
             confidence = documents.length > 0 ? Math.round(documents[0].similarity * 100) : 0;
@@ -96,7 +96,7 @@ ${context}
         let responseText = "";
         try {
             const response = await ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+                model: 'gemini-3.5-flash',
                 contents: [
                     { role: 'user', parts: [{ text: systemPrompt }] },
                     { role: 'model', parts: [{ text: '{"answer": "Understood. I will answer strictly based on the context and output JSON.", "relatedQuestions": []}' }] },
@@ -128,11 +128,11 @@ ${context}
             reply = { answer: responseText, relatedQuestions: [] };
         }
 
-        res.json({ 
-            response: reply.answer, 
-            confidence, 
-            sources, 
-            relatedQuestions: reply.relatedQuestions 
+        res.json({
+            response: reply.answer,
+            confidence,
+            sources,
+            relatedQuestions: reply.relatedQuestions
         });
 
     } catch (error) {
