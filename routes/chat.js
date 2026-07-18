@@ -56,6 +56,7 @@ router.post('/', async (req, res) => {
 
             documents = supaDocs || [];
 
+            require('fs').writeFileSync('payload_debug.json', JSON.stringify({ selectedDocs, type: typeof selectedDocs, isArray: Array.isArray(selectedDocs) }));
             console.log("Received selectedDocs:", selectedDocs);
             console.log("Documents before filter:", documents.length);
             // Apply local filtering if specific documents are selected (even if empty array, meaning all unchecked)
@@ -79,14 +80,18 @@ router.post('/', async (req, res) => {
         }
 
         const systemPrompt = `You are a helpful, accurate chatbot that answers questions strictly based on the provided company data. 
-If the answer cannot be found in the provided data, DO NOT hallucinate. 
+If the answer cannot be found in the provided Context, DO NOT hallucinate and DO NOT use information from previous chat history. 
 Instead, state clearly that you do not have the information.
-You MUST output your response as a valid JSON object matching this exact structure:
+
+IMPORTANT RULES:
+1. You must ONLY use the provided Context below to answer the user's latest question. 
+2. Even if previous messages in the chat history contain the answer, you must IGNORE the chat history if that information is not present in the current Context. The user may have unselected certain documents, so you must strictly respect the current Context.
+3. You MUST output your response as a valid JSON object matching this exact structure:
 {
   "answer": "Your detailed answer here...",
   "relatedQuestions": ["Question 1?", "Question 2?", "Question 3?"]
 }
-Ensure the relatedQuestions array contains exactly 3 relevant follow-up questions based on the context.
+Ensure the relatedQuestions array contains exactly 3 relevant follow-up questions based on the Context.
 
 Context:
 ${context}
