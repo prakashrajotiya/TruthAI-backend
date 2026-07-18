@@ -56,10 +56,16 @@ router.post('/', async (req, res) => {
 
             documents = supaDocs || [];
 
-            // Apply local filtering if specific documents are selected
-            if (selectedDocs && selectedDocs.length > 0) {
-                documents = documents.filter(doc => selectedDocs.includes(doc.metadata?.source));
+            console.log("Received selectedDocs:", selectedDocs);
+            console.log("Documents before filter:", documents.length);
+            // Apply local filtering if specific documents are selected (even if empty array, meaning all unchecked)
+            if (Array.isArray(selectedDocs)) {
+                documents = documents.filter(doc => {
+                    console.log("Checking doc source:", doc.metadata?.source);
+                    return selectedDocs.includes(doc.metadata?.source);
+                });
             }
+            console.log("Documents after filter:", documents.length);
 
             // Take the top 5 after filtering
             documents = documents.slice(0, 5);
