@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
 
             // Apply local filtering if specific documents are selected
             if (selectedDocs && selectedDocs.length > 0) {
-                documents = documents.filter(doc => selectedDocs.includes(doc.metadata?.filename));
+                documents = documents.filter(doc => selectedDocs.includes(doc.metadata?.source));
             }
 
             // Take the top 5 after filtering
@@ -68,7 +68,7 @@ router.post('/', async (req, res) => {
             context = documents.map(doc => doc.content).join('\n\n');
 
             // Extract sources and confidence
-            sources = [...new Set(documents.map(d => d.metadata?.filename).filter(Boolean))];
+            sources = [...new Set(documents.map(d => d.metadata?.source).filter(Boolean))];
             confidence = documents.length > 0 ? Math.round(documents[0].similarity * 100) : 0;
         }
 
