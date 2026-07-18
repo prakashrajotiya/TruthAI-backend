@@ -101,7 +101,15 @@ router.post('/', upload.single('file'), async (req, res) => {
         console.log(`Extracted text into ${chunks.length} chunks. Generating embeddings...`);
 
         // Generate embeddings and save to Supabase
-        for (const chunk of chunks) {
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            
+            // Add a 3-second delay between requests to avoid hitting the free tier 429 quota limit
+            if (i > 0) {
+                console.log(`Waiting to avoid rate limit... (${i}/${chunks.length})`);
+                await new Promise(resolve => setTimeout(resolve, 4000));
+            }
+
             const embeddingRes = await ai.models.embedContent({
                 model: 'gemini-embedding-2',
                 contents: chunk,
